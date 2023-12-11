@@ -21,7 +21,7 @@ endif()
 ############################## Custom build modes ###############################
 
 # Default flags for all build types
-set(COMMON_FLAGS "-Wall -Wextra -Wpedantic -Werror")
+set(COMMON_FLAGS "-Wall -Wextra -Wpedantic")
 
 # Debug build type
 set(CMAKE_CXX_FLAGS_DEBUG "${COMMON_FLAGS} -Og -g"
@@ -104,34 +104,28 @@ ExternalProject_Add(googlebenchmark
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
             -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
             -DCMAKE_CXX_FLAGS=${DCMAKE_CXX_FLAGS}
-        BUILD_BYPRODUCTS ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark${CMAKE_STATIC_LIBRARY_SUFFIX} ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark_main${CMAKE_STATIC_LIBRARY_SUFFIX}
+        BUILD_BYPRODUCTS
+            ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark${CMAKE_STATIC_LIBRARY_SUFFIX}
+            ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark_main${CMAKE_STATIC_LIBRARY_SUFFIX}
 )
 
-# Core BOSS
-if(NOT DEFINED BOSS_SOURCE_REPOSITORY)
-    if(NOT GITHUB_TOKEN)
-        message( FATAL_ERROR "You need to pass -DGITHUB_TOKEN=... to pass a github token to fetch the boss release or -DBOSS_SOURCE_REPOSITORY= for a non-github clone" )
-    endif()
-    set(BOSS_SOURCE_REPOSITORY https://little-big-h:${GITHUB_TOKEN}@github.com/symbol-store/BOSS.git)
-endif()
-if(NOT DEFINED BOSS_SOURCE_BRANCH)
-    set(BOSS_SOURCE_BRANCH main)
-endif()
-message("getting boss sources from ${BOSS_SOURCE_REPOSITORY}, branch ${BOSS_SOURCE_BRANCH}")
 ExternalProject_Add(BOSS
         GIT_REPOSITORY ${BOSS_SOURCE_REPOSITORY}
         GIT_TAG ${BOSS_SOURCE_BRANCH}
         GIT_SHALLOW ON
-        CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE} -DCMAKE_INSTALL_PREFIX=${BOSSBenchmarks_BINARY_DIR}/deps $<IF:$<CONFIG:>,,-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}>
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-        BUILD_BYPRODUCTS ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${BOSS_LINK_LIBRARY_PREFIX}BOSS${BOSS_LINK_LIBRARY_SUFFIX}
+        CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE} -DCMAKE_INSTALL_PREFIX=${BOSSBenchmarks_BINARY_DIR}/deps
+            $<IF:$<CONFIG:>,,-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}> -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+        BUILD_BYPRODUCTS
+            ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX}
 )
+
 
 ####################### Other Options and Library Dependencies #######################
 
 #set(VTune_DIR "" CACHE PATH "Where to look for VTune installation")
 #find_path(ITT_NOTIFY_INCLUDE_DIR "ittnotify.h" HINTS ${VTune_DIR}/include)
-#
+
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 #find_package(Threads REQUIRED)
 
@@ -141,6 +135,7 @@ set(BenchmarkFiles Benchmarks/BOSSBenchmarks.cpp)
 
 add_executable(Benchmarks ${BenchmarkFiles})
 add_dependencies(Benchmarks BOSS)
+
 #target_link_libraries(Benchmarks Threads::Threads)
 if(WIN32)
     target_link_libraries(Benchmarks shlwapi.lib)
@@ -157,6 +152,8 @@ add_dependencies(Benchmarks googlebenchmark)
 #endif(ITT_NOTIFY_INCLUDE_DIR)
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark${CMAKE_STATIC_LIBRARY_SUFFIX})
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark_main${CMAKE_STATIC_LIBRARY_SUFFIX})
+
+target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 #target_link_libraries(Benchmarks Threads::Threads)
 set_target_properties(Benchmarks PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
