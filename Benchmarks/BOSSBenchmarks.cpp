@@ -2,7 +2,7 @@
 #include <ExpressionUtilities.hpp>
 #include <Serialization.hpp>
 
-// #include "ITTNotifySupport.hpp"
+#include "ITTNotifySupport.hpp"
 #include <benchmark/benchmark.h>
 #include <iostream>
 #include <string>
@@ -11,12 +11,12 @@
 using namespace boss::utilities;
 
 namespace {
-int64_t operator""_i64(char c) { return static_cast<int64_t>(c); };
+int64_t operator""_i64(char c) { return static_cast<int64_t>(c); }
 } // namespace
 
 static std::vector<std::string> librariesToTest{};
+static auto const vtune = VTuneAPIInterface{"BOSS"};
 
-// static auto const vtune = VTuneAPIInterface{"BOSS"};
 static void tpch_q6(benchmark::State& state, const std::string& engineLibrary) {
 
   auto eval = [&engineLibrary](boss::Expression&& expression) mutable {
@@ -38,7 +38,7 @@ static void tpch_q6(benchmark::State& state, const std::string& engineLibrary) {
                "L_SHIPDATE"_("List"_("DateObject"_("1992-03-13"), "DateObject"_("1994-04-12"),
                                      "DateObject"_("1996-02-28"), "DateObject"_("1994-12-31"))));
 
-  //  vtune.startSampling("DummyBenchmark");
+
   for(auto _ : state) { // NOLINT
     auto output = eval("Group"_(
         "Project"_(
@@ -55,25 +55,24 @@ static void tpch_q6(benchmark::State& state, const std::string& engineLibrary) {
         "Sum"_("revenue"_)));
     benchmark::DoNotOptimize(output);
   }
-  //  vtune.stopSampling();
 
-  if (state.thread_index() == 0) {
-    std::cout << "Result: ";
-    auto output = eval("Group"_(
-        "Project"_(
-            "Select"_("Project"_(lineitem.clone(boss::expressions::CloneReason::FOR_TESTING),
-                                 "As"_("L_QUANTITY"_, "L_QUANTITY"_, "L_DISCOUNT"_, "L_DISCOUNT"_,
-                                       "L_SHIPDATE"_, "L_SHIPDATE"_, "L_EXTENDEDPRICE"_,
-                                       "L_EXTENDEDPRICE"_)),
-                      "Where"_("And"_("Greater"_(24, "L_QUANTITY"_),      // NOLINT
-                                      "Greater"_("L_DISCOUNT"_, 0.0499),  // NOLINT
-                                      "Greater"_(0.07001, "L_DISCOUNT"_), // NOLINT
-                                      "Greater"_("DateObject"_("1995-01-01"), "L_SHIPDATE"_),
-                                      "Greater"_("L_SHIPDATE"_, "DateObject"_("1993-12-31"))))),
-            "As"_("revenue"_, "Times"_("L_EXTENDEDPRICE"_, "L_DISCOUNT"_))),
-        "Sum"_("revenue"_)));
-    std::cout << output << std::endl;
-  }
+  std::cout << "Result: ";
+  vtune.startSampling("tpch_q6");
+  auto output = eval("Group"_(
+      "Project"_(
+          "Select"_("Project"_(lineitem.clone(boss::expressions::CloneReason::FOR_TESTING),
+                               "As"_("L_QUANTITY"_, "L_QUANTITY"_, "L_DISCOUNT"_, "L_DISCOUNT"_,
+                                     "L_SHIPDATE"_, "L_SHIPDATE"_, "L_EXTENDEDPRICE"_,
+                                     "L_EXTENDEDPRICE"_)),
+                    "Where"_("And"_("Greater"_(24, "L_QUANTITY"_),      // NOLINT
+                                    "Greater"_("L_DISCOUNT"_, 0.0499),  // NOLINT
+                                    "Greater"_(0.07001, "L_DISCOUNT"_), // NOLINT
+                                    "Greater"_("DateObject"_("1995-01-01"), "L_SHIPDATE"_),
+                                    "Greater"_("L_SHIPDATE"_, "DateObject"_("1993-12-31"))))),
+          "As"_("revenue"_, "Times"_("L_EXTENDEDPRICE"_, "L_DISCOUNT"_))),
+      "Sum"_("revenue"_)));
+  vtune.stopSampling();
+  std::cout << output << std::endl;
 }
 
 void initAndRunBenchmarks(int argc, char** argv) {

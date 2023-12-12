@@ -120,11 +120,7 @@ ExternalProject_Add(BOSS
             ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX}
 )
 
-
 ####################### Other Options and Library Dependencies #######################
-
-#set(VTune_DIR "" CACHE PATH "Where to look for VTune installation")
-#find_path(ITT_NOTIFY_INCLUDE_DIR "ittnotify.h" HINTS ${VTune_DIR}/include)
 
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 #find_package(Threads REQUIRED)
@@ -141,15 +137,27 @@ if(WIN32)
     target_link_libraries(Benchmarks shlwapi.lib)
 endif(WIN32)
 add_dependencies(Benchmarks googlebenchmark)
-#if(ITT_NOTIFY_INCLUDE_DIR)
-#    message(VERBOSE "found itt notify header in ${ITT_NOTIFY_INCLUDE_DIR}")
-#    target_include_directories(Benchmarks SYSTEM PUBLIC ${ITT_NOTIFY_INCLUDE_DIR})
-#    target_link_libraries(Benchmarks ${ITT_NOTIFY_INCLUDE_DIR}/../lib64/libittnotify${CMAKE_STATIC_LIBRARY_SUFFIX})
-#    if(NOT WIN32)
-#        target_link_libraries(Benchmarks dl)
-#    endif(NOT WIN32)
-#    target_compile_options(Benchmarks PUBLIC -DWITH_ITT_NOTIFY)
-#endif(ITT_NOTIFY_INCLUDE_DIR)
+
+option(ENABLE_PROFILING FALSE)
+if (ENABLE_PROFILING)
+    set(VTune_DIR "" CACHE PATH "Where to look for VTune installation")
+    message("Including profiling data collection and using VTune_DIR: ${VTune_DIR}")
+    find_path(ITT_NOTIFY_INCLUDE_DIR "ittnotify.h" HINTS ${VTune_DIR}/include)
+    target_compile_options(Benchmarks PUBLIC -DWITH_ITT_NOTIFY)
+else()
+    message("Not including profiling data collection")
+    unset(ITT_NOTIFY_INCLUDE_DIR CACHE)
+endif()
+
+if(ITT_NOTIFY_INCLUDE_DIR)
+    message("Found itt notify header in ${ITT_NOTIFY_INCLUDE_DIR}")
+    target_include_directories(Benchmarks SYSTEM PUBLIC ${ITT_NOTIFY_INCLUDE_DIR})
+    target_link_libraries(Benchmarks ${ITT_NOTIFY_INCLUDE_DIR}/../lib64/libittnotify${CMAKE_STATIC_LIBRARY_SUFFIX})
+    if(NOT WIN32)
+        target_link_libraries(Benchmarks dl)
+    endif(NOT WIN32)
+endif(ITT_NOTIFY_INCLUDE_DIR)
+
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark${CMAKE_STATIC_LIBRARY_SUFFIX})
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}benchmark_main${CMAKE_STATIC_LIBRARY_SUFFIX})
 
