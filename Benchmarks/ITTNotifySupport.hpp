@@ -22,6 +22,8 @@ public:
     auto task = __itt_string_handle_create(taskname.str().c_str());
     __itt_resume();
     __itt_task_begin(domain, __itt_null, __itt_null, task);
+#else
+    ((void)tasknameComponents, ...); // Silence the "unused parameter" warning
 #endif // WITH_ITT_NOTIFY
   }
   void stopSampling() const {

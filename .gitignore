@@ -9,3 +9,5 @@ Debug/
 Release/
 MinSizeRel/
 RelWithDebInfo/
+dbgen/
+data/tpch_*MB/

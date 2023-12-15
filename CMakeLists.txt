@@ -120,11 +120,6 @@ ExternalProject_Add(BOSS
             ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX}
 )
 
-####################### Other Options and Library Dependencies #######################
-
-#set(THREADS_PREFER_PTHREAD_FLAG ON)
-#find_package(Threads REQUIRED)
-
 ################################ Benchmark executable ################################
 
 set(BenchmarkFiles Benchmarks/BOSSBenchmarks.cpp)
@@ -132,7 +127,6 @@ set(BenchmarkFiles Benchmarks/BOSSBenchmarks.cpp)
 add_executable(Benchmarks ${BenchmarkFiles})
 add_dependencies(Benchmarks BOSS)
 
-#target_link_libraries(Benchmarks Threads::Threads)
 if(WIN32)
     target_link_libraries(Benchmarks shlwapi.lib)
 endif(WIN32)
@@ -163,7 +157,6 @@ target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_S
 
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-#target_link_libraries(Benchmarks Threads::Threads)
 set_target_properties(Benchmarks PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 if(MSVC)
     target_compile_options(Benchmarks PUBLIC "/Zc:__cplusplus")
