@@ -11,3 +11,4 @@ MinSizeRel/
 RelWithDebInfo/
 dbgen/
 data/tpch_*MB/
+results/

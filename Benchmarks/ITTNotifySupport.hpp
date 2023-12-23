@@ -1,3 +1,6 @@
+#ifndef ITTNOTIFYSUPPORT_H
+#define ITTNOTIFYSUPPORT_H
+
 #ifdef WITH_ITT_NOTIFY
 #include <ittnotify.h>
 #include <sstream>
@@ -33,3 +36,5 @@ public:
 #endif // WITH_ITT_NOTIFY
   }
 };
+
+#endif // ITTNOTIFYSUPPORT_H

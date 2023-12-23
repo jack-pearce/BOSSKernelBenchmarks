@@ -42,11 +42,11 @@ set(CMAKE_SHARED_LINKER_FLAGS_DEBUG
         FORCE)
 
 # Release build type
-set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} -O3"
+set(CMAKE_CXX_FLAGS_RELEASE "${COMMON_FLAGS} -O3 -g"
         CACHE STRING
         "Flags used by the C++ compiler during Release builds."
         FORCE)
-set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} -O3"
+set(CMAKE_C_FLAGS_RELEASE "${COMMON_FLAGS} -O3 -g"
         CACHE STRING
         "Flags used by the C compiler during Release builds."
         FORCE)
@@ -157,7 +157,7 @@ target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_S
 
 target_link_libraries(Benchmarks ${BOSSBenchmarks_BINARY_DIR}/deps/lib/${CMAKE_SHARED_LIBRARY_PREFIX}BOSS${CMAKE_SHARED_LIBRARY_SUFFIX})
 
-set_target_properties(Benchmarks PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+set_target_properties(Benchmarks PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
 if(MSVC)
     target_compile_options(Benchmarks PUBLIC "/Zc:__cplusplus")
     target_compile_options(Benchmarks PUBLIC "/EHsc")
