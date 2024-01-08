@@ -161,7 +161,7 @@ void initStorageEngine_randomness_sweep_sorted_diss(int dataSize, float percenta
 
 void randomness_sweep_sorted_dis_Benchmark(benchmark::State& state, int dataSize,
                                              const std::string& queryName) {
-  float percentageRandom = state.range(0) / 100.0;
+  float percentageRandom = static_cast<float>(state.range(0)) / 100.0;
   initStorageEngine_randomness_sweep_sorted_diss(dataSize, percentageRandom);
 
   auto eval = [](auto&& expression) {

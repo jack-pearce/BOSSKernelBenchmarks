@@ -8,15 +8,17 @@
 #include <random>
 #include <set>
 #include <vector>
+#include <cassert>
 
-std::vector<int> generateLogDistribution(int numPoints, double minValue, double maxValue) {
-  std::vector<int> points;
+template <typename T>
+std::vector<T> generateLogDistribution(int numPoints, double minValue, double maxValue) {
+  std::vector<T> points;
 
   for(auto i = 0; i < numPoints; ++i) {
     auto t = i / static_cast<double>(numPoints - 1); // Normalized parameter between 0 and 1
     auto value =
         std::pow(10.0, t * (std::log10(maxValue) - std::log10(minValue)) + std::log10(minValue));
-    points.push_back(static_cast<int>(value));
+    points.push_back(static_cast<T>(value));
   }
 
   auto unique_end = std::unique(points.begin(), points.end());
@@ -60,6 +62,11 @@ template <typename T>
 std::vector<T> generatePartiallySortedOneToOneHundred(int n, int numRepeats,
                                                       float percentageRandom) {
   static_assert(std::is_integral<T>::value, "Must be an integer type");
+  assert(percentageRandom >= 0.0 && percentageRandom <= 100.0);
+
+  if (static_cast<int>(percentageRandom) == 100) {
+    return generateUniformDistribution<T>(n, 1, 100);
+  }
 
 #if False
   std::cout << "Generating data in memory... ";
